@@ -56,6 +56,7 @@ app.listen(port, () => {
 })
 
 const calculateArduinoMillis = async () => {
+    console.log('calculateArduinoMillis');
     
     //const arduino_starts = (await get(ref(db, 'traffic_lights/arduinoStarts'))).val();
     //const next_start_time = (await get(ref(db, 'traffic_lights/startTime/time'))).val();
@@ -78,6 +79,7 @@ const calculateArduinoMillis = async () => {
 }
 
 const updateCycleTime = () => {
+    console.log('updateCycleTime');
     let current_time = Date.now();
     const cycle_time = 10 * 1000;
     
