@@ -5,6 +5,5 @@
 .vscode/ipch
 
 node_modules/
-package-lock.json
 platformio.ini
 yarn.lock
