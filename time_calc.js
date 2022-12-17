@@ -39,7 +39,7 @@ const updateCycleTime = async () => {
 
     if (current_time > (start_time - 1000)) {
         current_time = Date.now();
-        const new_cycle = current_time + cycle_length + 1000;
+        const new_cycle = current_time + cycle_length + 5000;
         start_time = new_cycle;
     }
 }
