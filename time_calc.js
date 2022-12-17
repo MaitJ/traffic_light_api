@@ -39,7 +39,7 @@ const updateCycleTime = async () => {
 
     if (current_time > (start_time - 1000)) {
         current_time = Date.now();
-        const new_cycle = current_time + cycle_length;
+        const new_cycle = current_time + cycle_length + 1000;
         start_time = new_cycle;
     }
 }
@@ -60,6 +60,7 @@ const getArduinoStarts = () => {
     return arduino_starts;
 }
 exports.cycleUpdateMiddleware = cycleUpdateMiddleware;
+exports.updateCycleTime = updateCycleTime;
 exports.getStartTime = getStartTime;
 exports.getArduinoMillis = getArduinoMillis;
 exports.getArduinoStarts = getArduinoStarts;

@@ -41,8 +41,14 @@ app.get('/get_arduino_start/:light_id', cycleUpdateMiddleware, (req, res) => {
     });
 })
 
-app.get('/get_start_time', cycleUpdateMiddleware, (req, res) => {
+app.get('/get_start_time', (req, res) => {
     res.status(200).json({
         start: getStartTime()
+    });
+})
+
+app.get('/set_start_time', cycleUpdateMiddleware, (req, res) => {
+    res.status(200).json({
+        status: "Time set!"
     });
 })
