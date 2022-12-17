@@ -37,11 +37,11 @@ const updateCycleTime = async () => {
     const cycle_length = (await get(db_cycle_length_ref)).val();
     console.log('cycle_length: ', cycle_length);
 
-    if (current_time > (start_time - 1000)) {
-        current_time = Date.now();
-        const new_cycle = current_time + cycle_length + 5000;
-        start_time = new_cycle;
-    }
+    // if (current_time > (start_time - 1000)) {
+    current_time = Date.now();
+    const new_cycle = current_time + cycle_length + 5000;
+    start_time = new_cycle;
+    // }
 }
 
 const cycleUpdateMiddleware = async (req, res, next) => {
