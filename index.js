@@ -3,7 +3,7 @@ const fs = require('fs');
 const parser = require('body-parser');
 const cors = require('cors');
 const {getDatabase} = require('firebase/database');
-const {cycleUpdateMiddleware, getStartTime, getArduinoMillis, getArduinoStarts} = require('./time_calc')
+const {cycleUpdateMiddleware, getStartTime, getArduinoMillis, getArduinoStarts, getCycleLength, getYellowStates, setCycleLength, setYellowState} = require('./time_calc')
 
 
 const app = express()
@@ -44,5 +44,32 @@ app.get('/get_arduino_start/:light_id', cycleUpdateMiddleware, (req, res) => {
 app.get('/get_start_time', cycleUpdateMiddleware, (req, res) => {
     res.status(200).json({
         start: getStartTime()
+    });
+})
+
+app.get('/get_cycle_length', (req, res) => {
+    res.status(200).json({
+        cycleLength: getCycleLength()
+    });
+})
+
+app.get('/set_cycle_length/:length', (req, res) => {
+    const length = req.params.length;
+    setCycleLength(Number(length));
+    res.status(200).send("Cycle length set!");
+})
+
+app.get('/set_yellow_state/:board_id/:state', (req, res) => {
+    const board_id = req.params.board_id;
+    const state = req.params.state;
+    setYellowState(board_id, state)
+    res.status(200).send("Board " + board_id + " state set!");
+})
+
+app.get('/get_yellow_state/:board_id', (req, res) => {
+    const board_id = req.params.board_id;
+    const states = getYellowStates();
+    res.status(200).json({
+        state: states[Number(board_id)]
     });
 })

@@ -4,7 +4,9 @@ const {initializeApp} = require('firebase/app');
 let start_time = 0;
 let arduino_millis = [0, 0]
 let arduino_starts = [0, 0]
-
+let yellow_states = [0, 0, 0, 0];
+// 1. Arduino 0, 2. Arduino 1, 3. Network light 0, 4. Network light 1
+let cycleLength = 20000;
 
 const firebaseConfig = {
     apiKey: "API_KEY",
@@ -59,7 +61,24 @@ const getArduinoMillis = () => {
 const getArduinoStarts = () => {
     return arduino_starts;
 }
+const getCycleLength = () => {
+    return cycleLength;
+}
+const getYellowStates = () => {
+    return yellow_states;
+}
+
+const setCycleLength = (length) => {
+    cycleLength = length;
+}
+const setYellowState = (id, state) => {
+    yellow_states[id] = state;
+}
 exports.cycleUpdateMiddleware = cycleUpdateMiddleware;
 exports.getStartTime = getStartTime;
 exports.getArduinoMillis = getArduinoMillis;
 exports.getArduinoStarts = getArduinoStarts;
+exports.getCycleLength = getCycleLength;
+exports.getYellowStates = getYellowStates;
+exports.setCycleLength = setCycleLength;
+exports.setYellowState = setYellowState;
