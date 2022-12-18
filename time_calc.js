@@ -21,10 +21,10 @@ const firebaseConfig = {
 const firebaseApp = initializeApp(firebaseConfig);
 const db = getDatabase(firebaseApp);
 
-const calculateArduinoMillis = async (board_id) => {
-    console.log('start_time: ', start_time);
-    console.log('brdId: ', board_id);
+const calculateArduinoMillis = (board_id) => {
     const l_start_time = arduino_starts[board_id];
+
+    console.log(`start_time: ${start_time}, l_start_time: ${l_start_time}`);
     const offset = start_time - l_start_time;
     if (offset != arduino_millis[board_id])
         arduino_millis[board_id] = offset;
@@ -44,18 +44,21 @@ const updateCycleTime = async () => {
     if (current_time - start_time > 40000) {
         const new_cycle = current_time + cycleLength;
         start_time = new_cycle;
+        console.log('set start_time');
         return;
     }
 
     if (current_time > (start_time - 1000)) {
         const new_cycle = start_time + cycle_length;
         start_time = new_cycle;
+        console.log('set start_time');
     }
 }
 
 const cycleUpdateMiddleware = async (req, res, next) => {
     await updateCycleTime();
     // await calculateArduinoMillis(board_id);
+    console.log('calling next()');
     next();
 }
 
@@ -67,6 +70,9 @@ const getArduinoMillis = () => {
 }
 const getArduinoStarts = () => {
     return arduino_starts;
+}
+const setArduinoStarts = (starts) => {
+    arduino_starts = starts;
 }
 const getCycleLength = () => {
     return cycleLength;
@@ -90,3 +96,4 @@ exports.getCycleLength = getCycleLength;
 exports.getYellowStates = getYellowStates;
 exports.setCycleLength = setCycleLength;
 exports.setYellowState = setYellowState;
+exports.setArduinoStarts = setArduinoStarts;
