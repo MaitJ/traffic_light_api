@@ -48,10 +48,10 @@ const updateCycleTime = async () => {
     }
 }
 
-const cycleUpdateMiddleware = async (req, res, next, board_id) => {
+const cycleUpdateMiddleware = async (req, res, next) => {
     console.log("BoardId: " + board_id);
     await updateCycleTime();
-    await calculateArduinoMillis(board_id);
+    // await calculateArduinoMillis(board_id);
     next();
 }
 
@@ -78,6 +78,7 @@ const setYellowState = (id, state) => {
     yellow_states[id] = state;
 }
 exports.cycleUpdateMiddleware = cycleUpdateMiddleware;
+exports.calculateArduinoMillis = calculateArduinoMillis;
 exports.getStartTime = getStartTime;
 exports.getArduinoMillis = getArduinoMillis;
 exports.getArduinoStarts = getArduinoStarts;
