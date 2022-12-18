@@ -22,9 +22,9 @@ const firebaseApp = initializeApp(firebaseConfig);
 const db = getDatabase(firebaseApp);
 
 const calculateArduinoMillis = (board_id) => {
-    console.log('start_time: ', start_time);
-    console.log('brdId: ', board_id);
     const l_start_time = arduino_starts[board_id];
+
+    console.log(`start_time: ${start_time}, l_start_time: ${l_start_time}`);
     const offset = start_time - l_start_time;
     if (offset != arduino_millis[board_id])
         arduino_millis[board_id] = offset;
