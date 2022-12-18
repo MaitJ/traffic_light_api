@@ -2,8 +2,6 @@ const express = require('express')
 const fs = require('fs');
 const parser = require('body-parser');
 const cors = require('cors');
-const {initializeApp} = require('firebase/app');
-const {getDatabase, get, ref} = require('firebase/database');
 const {TimeCalculations} = require('./time_calc')
 
 
@@ -13,21 +11,7 @@ app.use(parser.urlencoded({extended: false}));
 app.use(parser.json());
 const port = process.env.PORT || 3000;
 
-const firebaseConfig = {
-    apiKey: "API_KEY",
-    authDomain: "budget-kahoot.firebaseapp.com",
-    databaseURL: "https://budget-kahoot-default-rtdb.europe-west1.firebasedatabase.app",
-    projectId: "budget-kahoot",
-    storageBucket: "budget-kahoot.appspot.com",
-    messagingSenderId: "332478696005",
-    appId: "1:332478696005:web:2b6adcec8ceeb90b4c312c"
-};
 
-//const firebaseApp = initializeApp(firebaseConfig);
-//const db = getDatabase(firebaseApp);
-
-//const db_cycle_length_ref = ref(db, 'traffic_lights/cycleLength');
-//const cycle_length = (await get(db_cycle_length_ref)).val();
 const timeCalculations = new TimeCalculations(20000);
 
 
@@ -35,13 +19,17 @@ const timeCalculations = new TimeCalculations(20000);
 app.get('/arduino_start/:board_id', async (req, res) => {
     const current_time = Date.now();
 
-    const arduino_millis = timeCalculations.getArduinoMillis();
-    const arduino_starts = timeCalculations.getArduinoStarts();
+    const arduino_millis = await timeCalculations.getArduinoMillis();
+    const arduino_starts = await timeCalculations.getArduinoStarts();
 
     const board_id = req.params.board_id;
     arduino_millis[board_id] = 0;
     arduino_starts[board_id] = current_time;
-    setArduinoStarts(arduino_starts);
+
+    const new_starts = {
+        arduinoStarts: arduino_starts
+    };
+    timeCalculations.setArduinoStarts(new_starts);
 
     console.log("arduino_start: " + arduino_starts + "with id: " + board_id);
     return res.status(200).send();
@@ -54,8 +42,8 @@ app.listen(port, () => {
 
 app.get('/get_arduino_start/:light_id', timeCalculations.cycleUpdateMiddleware, async (req, res) => {
     const board_id = req.params.light_id;
-    calculateArduinoMillis(board_id);
-    const arduino_millis = getArduinoMillis();
+    await timeCalculations.calculateArduinoMillis(board_id);
+    const arduino_millis = await timeCalculations.getArduinoMillis();
     console.log('arduino_millis (' + board_id + ') : ' + arduino_millis);
 
     res.status(200).json({
@@ -63,17 +51,14 @@ app.get('/get_arduino_start/:light_id', timeCalculations.cycleUpdateMiddleware, 
     });
 })
 
-app.get('/get_start_time/:board_id', timeCalculations.cycleUpdateMiddleware, (req, res) => {
+app.get('/get_start_time/:board_id', timeCalculations.cycleUpdateMiddleware, async (req, res) => {
     const board_id = req.params.board_id;
-    timeCalculations.calculateArduinoMillis(board_id);
+    await timeCalculations.calculateArduinoMillis(board_id);
     const rand = Math.random() * 1000;
     console.log('random time: ', rand);
-    setTimeout(() => {
-        console.log('sent start_time');
-        res.status(200).json({
-            start: timeCalculations.getStartTime()
-        });
-    }, rand);
+    res.status(200).json({
+        start: await timeCalculations.getStartTime()
+    });
 })
 
 app.get('/get_cycle_length', (req, res) => {
