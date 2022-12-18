@@ -44,6 +44,7 @@ const updateCycleTime = async () => {
     if (current_time - start_time > 40000) {
         const new_cycle = current_time + cycleLength;
         start_time = new_cycle;
+        return;
     }
 
     if (current_time > (start_time - 1000)) {
