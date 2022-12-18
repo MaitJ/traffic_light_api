@@ -64,6 +64,12 @@ app.get('/set_cycle_length/:length', (req, res) => {
     res.status(200).send("Cycle length set!");
 })
 
+app.get('/set_green_wave/:state', (req, res) => {
+    const state = req.params.state;
+    setGreenWave(Number(state));
+    res.status(200).send("Green wave set!");
+})
+
 app.get('/set_yellow_state/:board_id/:state', (req, res) => {
     const board_id = req.params.board_id;
     const state = req.params.state;
