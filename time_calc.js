@@ -1,7 +1,7 @@
 const {getDatabase, ref, get} = require('firebase/database');
 const {initializeApp} = require('firebase/app');
 
-let start_time = 0;
+let start_time = Date.now();
 let arduino_millis = [0, 0]
 let arduino_starts = [0, 0]
 let yellow_states = [0, 0, 0, 0];
@@ -41,9 +41,13 @@ const updateCycleTime = async () => {
     const cycle_length = (await get(db_cycle_length_ref)).val();
     console.log('cycle_length: ', cycle_length);
 
+    if (current_time - start_time > 40000) {
+        const new_cycle = current_time + cycleLength;
+        start_time = new_cycle;
+    }
+
     if (current_time > (start_time - 1000)) {
-        current_time = Date.now();
-        const new_cycle = current_time + cycle_length;
+        const new_cycle = start_time + cycle_length;
         start_time = new_cycle;
     }
 }
