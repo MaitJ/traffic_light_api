@@ -21,14 +21,16 @@ const firebaseConfig = {
 const firebaseApp = initializeApp(firebaseConfig);
 const db = getDatabase(firebaseApp);
 
-const calculateArduinoMillis = async () => {
+const calculateArduinoMillis = async (board_id) => {
     console.log('start_time: ', start_time);
-    arduino_starts.forEach((l_start_time, i) => {
-        console.log('l_start_time: ', l_start_time);
-        const offset = start_time - l_start_time;
-        if (offset != arduino_millis[i])
-            arduino_millis[i] = offset;
-    })
+    console.log('brdId: ', board_id);
+    const l_start_time = arduino_starts[board_id];
+    const offset = start_time - l_start_time;
+    if (offset != arduino_millis[i])
+        arduino_millis[i] = offset;
+    // arduino_starts.forEach((l_start_time, i) => {
+    //     console.log('l_start_time: ', l_start_time);
+    // })
 }
 
 const updateCycleTime = async () => {
@@ -46,9 +48,10 @@ const updateCycleTime = async () => {
     }
 }
 
-const cycleUpdateMiddleware = async (req, res, next) => {
+const cycleUpdateMiddleware = async (req, res, next, board_id) => {
+    console.log("BoardId: " + board_id);
     await updateCycleTime();
-    await calculateArduinoMillis();
+    await calculateArduinoMillis(board_id);
     next();
 }
 
