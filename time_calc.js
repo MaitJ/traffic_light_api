@@ -49,7 +49,6 @@ const updateCycleTime = async () => {
 }
 
 const cycleUpdateMiddleware = async (req, res, next) => {
-    console.log("BoardId: " + board_id);
     await updateCycleTime();
     // await calculateArduinoMillis(board_id);
     next();
