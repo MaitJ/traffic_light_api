@@ -3,7 +3,7 @@ const fs = require('fs');
 const parser = require('body-parser');
 const cors = require('cors');
 const {getDatabase} = require('firebase/database');
-const {cycleUpdateMiddleware, getStartTime, getArduinoMillis, getArduinoStarts, getCycleLength, getYellowStates, setCycleLength, setYellowState} = require('./time_calc')
+const {cycleUpdateMiddleware, getStartTime, getArduinoMillis, getArduinoStarts, getCycleLength, getYellowStates, setCycleLength, setYellowState, calculateArduinoMillis} = require('./time_calc')
 
 
 const app = express()
@@ -32,9 +32,9 @@ app.listen(port, () => {
     console.log('Started app on :%d', port);
 })
 
-app.get('/get_arduino_start/:light_id', (req, res) => {
+app.get('/get_arduino_start/:light_id', cycleUpdateMiddleware, (req, res) => {
     const board_id = req.params.light_id;
-    cycleUpdateMiddleware(req, res, next, board_id);
+    calculateArduinoMillis(board_id);
     const arduino_millis = getArduinoMillis();
     console.log('arduino_millis (get): ', arduino_millis);
 
@@ -43,9 +43,9 @@ app.get('/get_arduino_start/:light_id', (req, res) => {
     });
 })
 
-app.get('/get_start_time/:board_id', (req, res) => {
+app.get('/get_start_time/:board_id', cycleUpdateMiddleware, (req, res) => {
     const board_id = req.params.board_id;
-    cycleUpdateMiddleware(req, res, next, board_id);
+    calculateArduinoMillis(board_id);
     res.status(200).json({
         start: getStartTime()
     });
