@@ -26,8 +26,8 @@ const calculateArduinoMillis = async (board_id) => {
     console.log('brdId: ', board_id);
     const l_start_time = arduino_starts[board_id];
     const offset = start_time - l_start_time;
-    if (offset != arduino_millis[i])
-        arduino_millis[i] = offset;
+    if (offset != arduino_millis[board_id])
+        arduino_millis[board_id] = offset;
     // arduino_starts.forEach((l_start_time, i) => {
     //     console.log('l_start_time: ', l_start_time);
     // })
