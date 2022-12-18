@@ -7,6 +7,11 @@ let arduino_starts = [0, 0]
 let yellow_states = [0, 0, 0, 0];
 // 1. Arduino 0, 2. Arduino 1, 3. Network light 0, 4. Network light 1
 let cycleLength = 20000;
+let greenWaveToggle = false;
+let greenWaveLength = 1;
+// Kordaja, millega korrutatakse läbi, et rohelise laine pikkust määrata.
+let greenWaveStartPos = 0;
+// Ehk laine järjekord, määratakse esimene foor.
 
 const firebaseConfig = {
     apiKey: "API_KEY",
@@ -36,10 +41,6 @@ const calculateArduinoMillis = (board_id) => {
 const updateCycleTime = async () => {
     console.log('updateCycleTime');
     let current_time = Date.now();
-    const db_cycle_length_ref = ref(db, 'traffic_lights/cycleLength');
-    
-    const cycle_length = (await get(db_cycle_length_ref)).val();
-    console.log('cycle_length: ', cycle_length);
 
     if (current_time - start_time > 40000) {
         const new_cycle = current_time + cycleLength;
@@ -49,9 +50,10 @@ const updateCycleTime = async () => {
     }
 
     if (current_time > (start_time - 1000)) {
-        const new_cycle = start_time + cycle_length;
+        const new_cycle = start_time + cycleLength;
         start_time = new_cycle;
         console.log('set start_time');
+        return;
     }
 }
 
@@ -87,6 +89,10 @@ const setCycleLength = (length) => {
 const setYellowState = (id, state) => {
     yellow_states[id] = state;
 }
+const setGreenWave = (state) => {
+    greenWaveToggle = state;
+}
+
 exports.cycleUpdateMiddleware = cycleUpdateMiddleware;
 exports.calculateArduinoMillis = calculateArduinoMillis;
 exports.getStartTime = getStartTime;
@@ -97,3 +103,4 @@ exports.getYellowStates = getYellowStates;
 exports.setCycleLength = setCycleLength;
 exports.setYellowState = setYellowState;
 exports.setArduinoStarts = setArduinoStarts;
+exports.setGreenWave = setGreenWave;
