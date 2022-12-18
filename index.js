@@ -23,7 +23,7 @@ app.get('/arduino_start/:board_id', async (req, res) => {
     arduino_millis[board_id] = 0;
     arduino_starts[board_id] = current_time;
 
-    console.log(arduino_starts);
+    console.log("arduino_start: " + arduino_starts + "with id: " + board_id);
     return res.status(200).send();
 })
 
@@ -36,7 +36,7 @@ app.get('/get_arduino_start/:light_id', cycleUpdateMiddleware, (req, res) => {
     const board_id = req.params.light_id;
     calculateArduinoMillis(board_id);
     const arduino_millis = getArduinoMillis();
-    console.log('arduino_millis (get): ', arduino_millis);
+    console.log('arduino_millis (' + board_id + ') : ' + arduino_millis);
 
     res.status(200).json({
         start: arduino_millis[Number(req.params.light_id)]
