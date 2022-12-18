@@ -71,6 +71,9 @@ const getArduinoMillis = () => {
 const getArduinoStarts = () => {
     return arduino_starts;
 }
+const setArduinoStarts = (starts) => {
+    arduino_starts = starts;
+}
 const getCycleLength = () => {
     return cycleLength;
 }
@@ -93,3 +96,4 @@ exports.getCycleLength = getCycleLength;
 exports.getYellowStates = getYellowStates;
 exports.setCycleLength = setCycleLength;
 exports.setYellowState = setYellowState;
+exports.setArduinoStarts = setArduinoStarts;
