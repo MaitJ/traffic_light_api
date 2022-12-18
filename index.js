@@ -3,7 +3,7 @@ const fs = require('fs');
 const parser = require('body-parser');
 const cors = require('cors');
 const {getDatabase} = require('firebase/database');
-const {cycleUpdateMiddleware, getStartTime, getArduinoMillis, getArduinoStarts, getCycleLength, getYellowStates, setCycleLength, setYellowState, calculateArduinoMillis} = require('./time_calc')
+const {cycleUpdateMiddleware, getStartTime, getArduinoMillis, getArduinoStarts, setArduinoStarts, getCycleLength, getYellowStates, setCycleLength, setYellowState, calculateArduinoMillis} = require('./time_calc')
 
 
 const app = express()
@@ -22,6 +22,7 @@ app.get('/arduino_start/:board_id', async (req, res) => {
     const board_id = req.params.board_id;
     arduino_millis[board_id] = 0;
     arduino_starts[board_id] = current_time;
+    setArduinoStarts(arduino_starts);
 
     console.log(arduino_starts);
     return res.status(200).send();
