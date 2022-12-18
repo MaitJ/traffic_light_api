@@ -21,7 +21,7 @@ const firebaseConfig = {
 const firebaseApp = initializeApp(firebaseConfig);
 const db = getDatabase(firebaseApp);
 
-const calculateArduinoMillis = async (board_id) => {
+const calculateArduinoMillis = (board_id) => {
     console.log('start_time: ', start_time);
     console.log('brdId: ', board_id);
     const l_start_time = arduino_starts[board_id];
@@ -44,18 +44,21 @@ const updateCycleTime = async () => {
     if (current_time - start_time > 40000) {
         const new_cycle = current_time + cycleLength;
         start_time = new_cycle;
+        console.log('set start_time');
         return;
     }
 
     if (current_time > (start_time - 1000)) {
         const new_cycle = start_time + cycle_length;
         start_time = new_cycle;
+        console.log('set start_time');
     }
 }
 
 const cycleUpdateMiddleware = async (req, res, next) => {
     await updateCycleTime();
     // await calculateArduinoMillis(board_id);
+    console.log('calling next()');
     next();
 }
 

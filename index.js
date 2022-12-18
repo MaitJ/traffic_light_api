@@ -32,7 +32,7 @@ app.listen(port, () => {
     console.log('Started app on :%d', port);
 })
 
-app.get('/get_arduino_start/:light_id', cycleUpdateMiddleware, (req, res) => {
+app.get('/get_arduino_start/:light_id', cycleUpdateMiddleware, async (req, res) => {
     const board_id = req.params.light_id;
     calculateArduinoMillis(board_id);
     const arduino_millis = getArduinoMillis();
