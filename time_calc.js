@@ -1,106 +1,86 @@
-const {getDatabase, ref, get} = require('firebase/database');
-const {initializeApp} = require('firebase/app');
-
-let start_time = Date.now();
-let arduino_millis = [0, 0]
-let arduino_starts = [0, 0]
-let yellow_states = [0, 0, 0, 0];
-// 1. Arduino 0, 2. Arduino 1, 3. Network light 0, 4. Network light 1
-let cycleLength = 20000;
-let greenWaveToggle = false;
-let greenWaveLength = 1;
+class TimeCalculations {
+    start_time =  Date.now();
+    arduino_millis = [0, 0]
+    arduino_starts = [0, 0]
+    yellow_states = [0, 0, 0, 0];
+    // 1. Arduino 0, 2. Arduino 1, 3. Network light 0, 4. Network light 1
+    cycle_length = 20000;
+    greenWaveToggle = false;
+    greenWaveLength = 1;
 // Kordaja, millega korrutatakse läbi, et rohelise laine pikkust määrata.
-let greenWaveStartPos = 0;
+    greenWaveStartPos = 0;
 // Ehk laine järjekord, määratakse esimene foor.
 
-const firebaseConfig = {
-    apiKey: "API_KEY",
-    authDomain: "budget-kahoot.firebaseapp.com",
-    databaseURL: "https://budget-kahoot-default-rtdb.europe-west1.firebasedatabase.app",
-    projectId: "budget-kahoot",
-    storageBucket: "budget-kahoot.appspot.com",
-    messagingSenderId: "332478696005",
-    appId: "1:332478696005:web:2b6adcec8ceeb90b4c312c"
-};
-
-const firebaseApp = initializeApp(firebaseConfig);
-const db = getDatabase(firebaseApp);
-
-const calculateArduinoMillis = (board_id) => {
-    const l_start_time = arduino_starts[board_id];
-
-    console.log(`start_time: ${start_time}, l_start_time: ${l_start_time}`);
-    const offset = start_time - l_start_time;
-    if (offset != arduino_millis[board_id])
-        arduino_millis[board_id] = offset;
-    // arduino_starts.forEach((l_start_time, i) => {
-    //     console.log('l_start_time: ', l_start_time);
-    // })
-}
-
-const updateCycleTime = async () => {
-    console.log('updateCycleTime');
-    let current_time = Date.now();
-
-    if (current_time - start_time > 40000) {
-        const new_cycle = current_time + cycleLength;
-        start_time = new_cycle;
-        console.log('set start_time');
-        return;
+    constructor(cycle_length) {
+        this.cycle_length = cycle_length;
     }
 
-    if (current_time > (start_time - 1000)) {
-        const new_cycle = start_time + cycleLength;
-        start_time = new_cycle;
-        console.log('set start_time');
-        return;
+    calculateArduinoMillis = (board_id) => {
+        const l_start_time = this.arduino_starts[board_id];
+
+        console.log(`start_time: ${this.start_time}, l_start_time: ${l_start_time}`);
+        const offset = this.start_time - l_start_time;
+        if (offset != this.arduino_millis[board_id])
+            this.arduino_millis[board_id] = offset;
+        // arduino_starts.forEach((l_start_time, i) => {
+        //     console.log('l_start_time: ', l_start_time);
+        // })
+    }
+
+    updateCycleTime = async () => {
+        console.log('updateCycleTime');
+        let current_time = Date.now();
+        console.log('cycle_length: ', this.cycle_length);
+
+        if (current_time - this.start_time > 40000) {
+            const new_cycle = current_time + this.cycle_length;
+            this.start_time = new_cycle;
+            console.log('set start_time > 40000');
+            return;
+        }
+
+        if (current_time > this.start_time) {
+            const new_cycle = this.start_time + this.cycle_length;
+            this.start_time = new_cycle;
+            console.log('set start_time');
+        }
+    }
+    cycleUpdateMiddleware = async (req, res, next) => {
+        await this.updateCycleTime();
+        // await calculateArduinoMillis(board_id);
+        console.log('calling next()');
+        next();
+    }
+
+    getStartTime = () => {
+        return this.start_time;
+    }
+    getArduinoMillis = () => {
+        return this.arduino_millis;
+    }
+    getArduinoStarts = () => {
+        return this.arduino_starts;
+    }
+    setArduinoStarts = (starts) => {
+        this.arduino_starts = starts;
+    }
+    getCycleLength = () => {
+        return this.cycleLength;
+    }
+    getYellowStates = () => {
+        return this.yellow_states;
+    }
+    setCycleLength = (length) => {
+        this.cycleLength = length;
+    }
+    setYellowState = (id, state) => {
+        this.yellow_states[id] = state;
+    }
+    setGreenWave = (state) => {
+        this.greenWaveToggle = state;
     }
 }
 
-const cycleUpdateMiddleware = async (req, res, next) => {
-    await updateCycleTime();
-    // await calculateArduinoMillis(board_id);
-    console.log('calling next()');
-    next();
-}
 
-const getStartTime = () => {
-    return start_time;
-}
-const getArduinoMillis = () => {
-    return arduino_millis;
-}
-const getArduinoStarts = () => {
-    return arduino_starts;
-}
-const setArduinoStarts = (starts) => {
-    arduino_starts = starts;
-}
-const getCycleLength = () => {
-    return cycleLength;
-}
-const getYellowStates = () => {
-    return yellow_states;
-}
 
-const setCycleLength = (length) => {
-    cycleLength = length;
-}
-const setYellowState = (id, state) => {
-    yellow_states[id] = state;
-}
-const setGreenWave = (state) => {
-    greenWaveToggle = state;
-}
-
-exports.cycleUpdateMiddleware = cycleUpdateMiddleware;
-exports.calculateArduinoMillis = calculateArduinoMillis;
-exports.getStartTime = getStartTime;
-exports.getArduinoMillis = getArduinoMillis;
-exports.getArduinoStarts = getArduinoStarts;
-exports.getCycleLength = getCycleLength;
-exports.getYellowStates = getYellowStates;
-exports.setCycleLength = setCycleLength;
-exports.setYellowState = setYellowState;
-exports.setArduinoStarts = setArduinoStarts;
-exports.setGreenWave = setGreenWave;
+exports.TimeCalculations = TimeCalculations;
