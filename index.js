@@ -41,29 +41,38 @@ app.listen(port, () => {
 })
 
 app.get('/get_arduino_start/:light_id', timeCalculations.cycleUpdateMiddleware, async (req, res) => {
+    const light_offsets = await timeCalculations.getTrafficLightOffsets();
     const board_id = req.params.light_id;
     await timeCalculations.calculateArduinoMillis(board_id);
     const arduino_millis = await timeCalculations.getArduinoMillis();
     console.log('arduino_millis (' + board_id + ') : ' + arduino_millis);
 
     res.status(200).json({
-        start: arduino_millis[Number(req.params.light_id)]
+        start: arduino_millis[Number(req.params.light_id)] + light_offsets[board_id]
+    });
+})
+
+app.get('/cycle_length', async (req, res) => {
+    const cycle_length = await timeCalculations.getCycleLength();
+    res.status(200).json({
+        cycle_length
     });
 })
 
 app.get('/get_start_time/:board_id', timeCalculations.cycleUpdateMiddleware, async (req, res) => {
+    const light_offsets = req.light_offsets;
     const board_id = req.params.board_id;
     await timeCalculations.calculateArduinoMillis(board_id);
     const rand = Math.random() * 1000;
     console.log('random time: ', rand);
     res.status(200).json({
-        start: await timeCalculations.getStartTime()
+        start: await timeCalculations.getStartTime() + light_offsets[board_id]
     });
 })
 
-app.get('/get_cycle_length', (req, res) => {
+app.get('/get_cycle_length', async (req, res) => {
     res.status(200).json({
-        cycleLength: timeCalculations.getCycleLength()
+        cycleLength: await timeCalculations.getCycleLength()
     });
 })
 

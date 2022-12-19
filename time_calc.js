@@ -32,11 +32,12 @@ class TimeCalculations {
         const db_cycle_length_ref = ref(this.db, 'traffic_lights/cycleLength');
         get(db_cycle_length_ref).then(snapshot => {
             const cycle_length = snapshot.val();
-            this.cycle_length = cycle_length
+            this.cycle_length = cycle_length;
         })
     }
 
     calculateArduinoMillis = async (board_id) => {
+        const cycle_length = await this.getCycleLength();
         const f_start_time = await this.getStartTime();
         const f_arduino_starts = await this.getArduinoStarts();
         const f_arduino_millis = await this.getArduinoMillis();
@@ -46,19 +47,12 @@ class TimeCalculations {
         this.arduino_millis = f_arduino_millis;
         this.arduino_starts = f_arduino_starts;
 
-        console.log('f_start_time: ', this.start_time);
-        console.log('f_arduino_starts: ', this.arduino_millis);
-        console.log('f_arduino_millis: ', this.arduino_starts);
-
         const l_start_time = this.arduino_starts[board_id];
 
         console.log(`start_time: ${this.start_time}, l_start_time: ${l_start_time}`);
         const offset = this.start_time - l_start_time;
         if (offset != this.arduino_millis[board_id])
-            this.arduino_millis[board_id] = offset;
-        // arduino_starts.forEach((l_start_time, i) => {
-        //     console.log('l_start_time: ', l_start_time);
-        // })
+            this.arduino_millis[board_id] = offset + cycle_length;
 
         const new_millis = {
             arduinoNextOffsets: this.arduino_millis
@@ -67,36 +61,36 @@ class TimeCalculations {
         await this.setArduinoMillis(new_millis);
     }
 
-    updateCycleTime = async () => {
+    updateCycleTime = async (req) => {
+        const light_offsets = await this.getTrafficLightOffsets();
+        const board_id = req.params.board_id;
         const start_time = (await get(ref(this.db, 'traffic_lights/startTime/time'))).val();
+        const cycle_length = this.getCycleLength();
 
-        console.log('fetched_start_time: ', start_time);
+        this.cycle_length = cycle_length;
         this.start_time = start_time;
 
-        console.log('updateCycleTime');
         let current_time = Date.now();
         console.log('cycle_length: ', this.cycle_length);
-
 
         if (current_time > this.start_time) {
             const new_cycle = this.start_time + this.cycle_length;
             this.start_time = new_cycle;
-            console.log('set start_time');
         }
 
         if (current_time - this.start_time > 40000) {
             const new_cycle = current_time + this.cycle_length;
             this.start_time = new_cycle;
-            console.log('set start_time > 40000');
         }
 
         const new_time = {
             time: Number(this.start_time)
         }
+        req.light_offsets = light_offsets;
         await update(ref(this.db, 'traffic_lights/startTime'), new_time).catch((e) => console.error('update err: ', e));
     }
     cycleUpdateMiddleware = async (req, res, next) => {
-        await this.updateCycleTime();
+        await this.updateCycleTime(req);
         // await calculateArduinoMillis(board_id);
         console.log('calling next()');
         next();
@@ -119,6 +113,10 @@ class TimeCalculations {
         await update(ref(this.db, 'traffic_lights'), starts);
         this.arduino_starts = starts;
     }
+    getCycleLength = async () => {
+        const cycle_length = (await get(ref(this.db, 'traffic_lights/cycle_length'))).val();
+        return cycle_length;
+    }
     setArduinoMillis = async (millis) => {
         console.log('millis: ', millis);
         await update(ref(this.db, 'traffic_lights'), millis);
@@ -138,6 +136,10 @@ class TimeCalculations {
     }
     setGreenWave = (state) => {
         this.greenWaveToggle = state;
+    }
+    getTrafficLightOffsets = async () => {
+        const traffic_light_offsets = (await get(ref(this.db, 'traffic_lights/offset'))).val();
+        return traffic_light_offsets;
     }
 }
 
