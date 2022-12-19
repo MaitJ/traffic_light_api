@@ -91,7 +91,7 @@ class TimeCalculations {
         }
 
         const new_time = {
-            time: this.start_time
+            time: Number(this.start_time)
         }
         await update(ref(this.db, 'traffic_lights/startTime'), new_time).catch((e) => console.error('update err: ', e));
     }
