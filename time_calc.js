@@ -52,7 +52,7 @@ class TimeCalculations {
         console.log(`start_time: ${this.start_time}, l_start_time: ${l_start_time}`);
         const offset = this.start_time - l_start_time;
         if (offset != this.arduino_millis[board_id])
-            this.arduino_millis[board_id] = offset + cycle_length;
+            this.arduino_millis[board_id] = offset;
 
         const new_millis = {
             arduinoNextOffsets: this.arduino_millis
