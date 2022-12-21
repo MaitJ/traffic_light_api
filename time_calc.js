@@ -114,7 +114,7 @@ class TimeCalculations {
         this.arduino_starts = starts;
     }
     getCycleLength = async () => {
-        const cycle_length = (await get(ref(this.db, 'traffic_lights/cycle_length'))).val();
+        const cycle_length = (await get(ref(this.db, 'traffic_lights/cycleLength'))).val();
         return cycle_length;
     }
     setArduinoMillis = async (millis) => {
