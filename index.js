@@ -17,14 +17,18 @@ const timeCalculations = new TimeCalculations(20000);
 
 
 app.get('/arduino_start/:board_id', async (req, res) => {
+    const millis_from_start = req.query.start_millis;
     const current_time = Date.now();
+    console.log('current_time: ', current_time);
+    const arduino_start = current_time - millis_from_start;
+    console.log('arduino_start: ', arduino_start);
 
     const arduino_millis = await timeCalculations.getArduinoMillis();
     const arduino_starts = await timeCalculations.getArduinoStarts();
 
     const board_id = req.params.board_id;
     arduino_millis[board_id] = 0;
-    arduino_starts[board_id] = current_time;
+    arduino_starts[board_id] = arduino_start;
 
     const new_starts = {
         arduinoStarts: arduino_starts
@@ -61,10 +65,9 @@ app.get('/cycle_length', async (req, res) => {
 
 app.get('/get_start_time/:board_id', timeCalculations.cycleUpdateMiddleware, async (req, res) => {
     const light_offsets = req.light_offsets;
+    console.log('firebase light_offsets: ', light_offsets);
     const board_id = req.params.board_id;
     await timeCalculations.calculateArduinoMillis(board_id);
-    const rand = Math.random() * 1000;
-    console.log('random time: ', rand);
     res.status(200).json({
         start: await timeCalculations.getStartTime() + light_offsets[board_id]
     });
