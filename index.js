@@ -52,7 +52,8 @@ app.get('/get_arduino_start/:light_id', timeCalculations.cycleUpdateMiddleware, 
     console.log('arduino_millis (' + board_id + ') : ' + arduino_millis);
 
     res.status(200).json({
-        start: arduino_millis[Number(req.params.light_id)] + light_offsets[board_id]
+        //Adding 2 because 0 and 1 are used by web traffic_lights
+        start: arduino_millis[Number(req.params.light_id)] + light_offsets[board_id + 2]
     });
 })
 
@@ -67,7 +68,7 @@ app.get('/get_start_time/:board_id', timeCalculations.cycleUpdateMiddleware, asy
     const light_offsets = req.light_offsets;
     console.log('firebase light_offsets: ', light_offsets);
     const board_id = req.params.board_id;
-    await timeCalculations.calculateArduinoMillis(board_id);
+    //await timeCalculations.calculateArduinoMillis(board_id);
     res.status(200).json({
         start: await timeCalculations.getStartTime() + light_offsets[board_id]
     });
