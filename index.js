@@ -50,7 +50,7 @@ app.get('/get_arduino_start/:light_id', timeCalculations.cycleUpdateMiddleware, 
     await timeCalculations.calculateArduinoMillis(board_id);
     const arduino_millis = await timeCalculations.getArduinoMillis();
     console.log('arduino_millis (' + board_id + ') : ' + arduino_millis);
-    console.log("lightOffset: " + light_offsets[board_id + 2]);
+    console.log("lightOffset: " + light_offsets);
 
     res.status(200).json({
         //Adding 2 because 0 and 1 are used by web traffic_lights
