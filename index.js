@@ -1,5 +1,4 @@
 const express = require('express')
-const fs = require('fs');
 const parser = require('body-parser');
 const cors = require('cors');
 const {TimeCalculations} = require('./time_calc')
@@ -14,14 +13,12 @@ const port = process.env.PORT || 3000;
 
 const timeCalculations = new TimeCalculations(20000);
 
-
-
+//Salvestab aja, millal arduino tööle läks
+//Tuleks kutsuda kui arduino tööle läheb
 app.get('/arduino_start/:board_id', async (req, res) => {
     const millis_from_start = req.query.start_millis;
     const current_time = Date.now();
-    console.log('current_time: ', current_time);
     const arduino_start = current_time - millis_from_start;
-    console.log('arduino_start: ', arduino_start);
 
     const arduino_millis = await timeCalculations.getArduinoMillis();
     const arduino_starts = await timeCalculations.getArduinoStarts();
@@ -35,7 +32,6 @@ app.get('/arduino_start/:board_id', async (req, res) => {
     };
     timeCalculations.setArduinoStarts(new_starts);
 
-    console.log("arduino_start: " + arduino_starts + "with id: " + board_id);
     return res.status(200).send();
 })
 
@@ -44,13 +40,11 @@ app.listen(port, () => {
     console.log('Started app on :%d', port);
 })
 
+//Kui on kutsutud arduino_start route'i, siis selle route'iga saaks järgmise tsükli aja konkreetsele arduinole
 app.get('/get_arduino_start/:light_id', timeCalculations.cycleUpdateMiddleware, async (req, res) => {
-    const light_offsets = await timeCalculations.getTrafficLightOffsets();
     const board_id = req.params.light_id;
     await timeCalculations.calculateArduinoMillis(board_id);
     const arduino_millis = await timeCalculations.getArduinoMillis();
-    console.log('arduino_millis (' + board_id + ') : ' + arduino_millis);
-    console.log("lightOffset: " + light_offsets);
 
     res.status(200).json({
         //Adding 2 because 0 and 1 are used by web traffic_lights
@@ -65,11 +59,12 @@ app.get('/cycle_length', async (req, res) => {
     });
 })
 
+//Konkreetse netifoori järgmine stardi aeg
+//Kasutab ka foori nihkeid andmebaasist
 app.get('/get_start_time/:board_id', timeCalculations.cycleUpdateMiddleware, async (req, res) => {
     const light_offsets = req.light_offsets;
-    console.log('firebase light_offsets: ', light_offsets);
     const board_id = req.params.board_id;
-    //await timeCalculations.calculateArduinoMillis(board_id);
+
     res.status(200).json({
         start: await timeCalculations.getStartTime() + light_offsets[board_id]
     });
