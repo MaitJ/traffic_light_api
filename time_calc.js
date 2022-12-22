@@ -6,17 +6,12 @@ class TimeCalculations {
     arduino_millis = [0, 0]
     arduino_starts = [0, 0]
     yellow_states = [0, 0, 0, 0];
-    // 1. Arduino 0, 2. Arduino 1, 3. Network light 0, 4. Network light 1
     cycle_length = 20000;
-    greenWaveToggle = false;
-    greenWaveLength = 1;
-// Kordaja, millega korrutatakse läbi, et rohelise laine pikkust määrata.
-    greenWaveStartPos = 0;
-// Ehk laine järjekord, määratakse esimene foor.
 
     constructor() {
+        //Tuleks anda parameetriks firebaseConfig, mille saab Firebase lehelt App loomisel.
         const firebaseConfig = {
-            apiKey: "AIzaSyBt0s4jGLD1k3_p8SfGS4yhoil0BKmZgKE",
+            apiKey: "{API_KEY}",
             authDomain: "budget-kahoot.firebaseapp.com",
             databaseURL: "https://budget-kahoot-default-rtdb.europe-west1.firebasedatabase.app",
             projectId: "budget-kahoot",
@@ -36,12 +31,13 @@ class TimeCalculations {
         })
     }
 
+    //Arvutab teatud arduinole (board_id'ga) järgmise tsükli algus aja
+    //Kasutab arduino_start route'lt salvestatud aega, et teha arduino jaoks uus aeg arusaadavaks
     calculateArduinoMillis = async (board_id) => {
-        const cycle_length = await this.getCycleLength();
         const f_start_time = await this.getStartTime();
+
         const f_arduino_starts = await this.getArduinoStarts();
         const f_arduino_millis = await this.getArduinoMillis();
-
 
         this.start_time = f_start_time;
         this.arduino_millis = f_arduino_millis;
@@ -49,7 +45,6 @@ class TimeCalculations {
 
         const l_start_time = this.arduino_starts[board_id];
 
-        console.log(`start_time: ${this.start_time}, l_start_time: ${l_start_time}`);
         const offset = this.start_time - l_start_time;
         if (offset != this.arduino_millis[board_id])
             this.arduino_millis[board_id] = offset;
@@ -57,13 +52,12 @@ class TimeCalculations {
         const new_millis = {
             arduinoNextOffsets: this.arduino_millis
         }
-        console.log('after updating: ', this.arduino_millis);
         await this.setArduinoMillis(new_millis);
     }
 
+    //Arvutatkse välja uus tsükli aeg, kui praegune aeg on suurem kui vana stardi aeg
     updateCycleTime = async (req) => {
         const light_offsets = await this.getTrafficLightOffsets();
-        const board_id = req.params.board_id;
         const start_time = (await get(ref(this.db, 'traffic_lights/startTime/time'))).val();
         const cycle_length = this.getCycleLength();
 
@@ -71,13 +65,13 @@ class TimeCalculations {
         this.start_time = start_time;
 
         let current_time = Date.now();
-        console.log('cycle_length: ', this.cycle_length);
 
         if (current_time > this.start_time) {
             const new_cycle = this.start_time + this.cycle_length;
             this.start_time = new_cycle;
         }
 
+        //Juhul kui ei ole teatud aega arvutatud uut tsüklit siis arvutatakse praegusest ajast uus
         if (current_time - this.start_time > 40000) {
             const new_cycle = current_time + this.cycle_length;
             this.start_time = new_cycle;
@@ -89,10 +83,10 @@ class TimeCalculations {
         req.light_offsets = light_offsets;
         await update(ref(this.db, 'traffic_lights/startTime'), new_time).catch((e) => console.error('update err: ', e));
     }
+
+    //Saab panna route külge, et enne route'i funktsiooni kutsumist juba uus stardi aeg oleks arvutatud
     cycleUpdateMiddleware = async (req, res, next) => {
         await this.updateCycleTime(req);
-        // await calculateArduinoMillis(board_id);
-        console.log('calling next()');
         next();
     }
 
