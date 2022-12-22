@@ -11,7 +11,7 @@ class TimeCalculations {
     constructor() {
         //Tuleks anda parameetriks firebaseConfig, mille saab Firebase lehelt App loomisel.
         const firebaseConfig = {
-            apiKey: "{API_KEY}",
+            apiKey: "AIzaSyBt0s4jGLD1k3_p8SfGS4yhoil0BKmZgKE",
             authDomain: "budget-kahoot.firebaseapp.com",
             databaseURL: "https://budget-kahoot-default-rtdb.europe-west1.firebasedatabase.app",
             projectId: "budget-kahoot",
@@ -137,7 +137,5 @@ class TimeCalculations {
         return traffic_light_offsets;
     }
 }
-
-
 
 exports.TimeCalculations = TimeCalculations;
