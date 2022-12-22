@@ -119,8 +119,9 @@ class TimeCalculations {
     getCycleLength = () => {
         return this.cycle_length;
     }
-    getYellowStates = () => {
-        return this.yellow_states;
+    getYellowStates = async () => {
+        const yellow_states = (await get(ref(this.db, 'traffic_lights/automatic'))).val();
+        return yellow_states;
     }
     setCycleLength = (length) => {
         this.cycle_length = length;
